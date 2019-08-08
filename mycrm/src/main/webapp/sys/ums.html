@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>用户管理</title>
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../js/windowAdapter.js"></script>
+		<script type="text/javascript" src="../js/locale/easyui-lang-zh_CN.js"></script>
+		<link rel="stylesheet" type="text/css" href="../js/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="../js/themes/icon.css">
+	</head>
+	<style>
+		.useritem{
+			width: 250px;
+			margin: 10px 0px 0px 60px;
+			float: left;
+			
+		}
+		.useritemdiv{
+			width: 80px;
+			float: left;
+			margin-top: 5px;
+		}	
+		a:hover{ color: red;}
+		
+		#setpassword{
+			margin-right: 20px;
+		}
+
+	</style>
+	<body>
+
+		<table class="easyui-datagrid" id="usertable" style="width: 100%;">
+			<thead>
+				<tr>
+					<th data-options="field:'userId',align:'center',width:'3%'">编号</th>
+					<th data-options="field:'userLoginname',align:'center',width:'8%'">登陆名</th>
+					<th data-options="field:'userName',align:'center',width:'5%'">姓名</th>
+					<th data-options="field:'userGender',align:'center',width:'5%',formatter:formatterGender">性别</th>
+					<th data-options="field:'userMobile',align:'center',width:'10%'">手机号</th>
+					<th data-options="field:'userEmail',align:'center',width:'15%'">邮箱地址</th>
+					<th data-options="field:'userAge',align:'center',width:'4%'">年龄</th>
+					<th data-options="field:'userBirthday',align:'center',width:'8%'">出生日期</th>
+					<th data-options="field:'useridentityCard',align:'center',width:'13%'">身份证号</th>
+					<th data-options="field:'userCreate',align:'center',width:'8%'">创建时间</th>
+					<th data-options="field:'userIslocking',align:'center',width:'5%'">状态</th>
+					<th data-options="field:'setUser',align:'center',width:'15%',formatter:formatterSetUser">设置</th>
+				</tr>
+			</thead>
+		</table>
+
+		<div id="usertb">
+			<a href="JavaScript:showUserInfo('insert');" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加</a>
+			<a href="JavaScript:deleteUser();" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除</a>
+			<a href="JavaScript:showUserInfo('update');" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">查询</a>
+		</div>
+
+
+		<div class="easyui-window" id="userinfotb" title="用户资料">
+			<form id="userinfoform" method="post">
+				<div class="useritem" style="margin-top: 20px;">
+					<div class="useritemdiv"><label for="loginname">登&nbsp;陆&nbsp;名&nbsp;:</label></div>
+					<input id="userloginname" class="easyui-textbox tbox" data-options="required:true" style="width: 150px;">
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="name">&nbsp;姓&nbsp;&nbsp;名&nbsp;:</label></div>
+					<input id="username" class="easyui-textbox tbox" data-options="required:true" style="width: 150px;" />
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="gender">&nbsp;性&nbsp;&nbsp;别&nbsp;:</label></div>
+					<select id="usergender" class="easyui-combobox" data-options="panelHeight:80,editable:false" name="gender" style="width:100px;">
+						<option value="0">男</option>
+						<option value="1">女</option>
+					</select>
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="age">&nbsp;年&nbsp;&nbsp;龄&nbsp;:</label></div>
+					<input id="userage" class="easyui-numberbox tbox" data-options="" style="width: 150px;" />
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="birthday">出生日期&nbsp;:</label></div>
+					<input id="userbirthday" class="easyui-datebox tbox" data-options="panelWidth:200,panelHeight:200" style="width: 150px;" />
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="mobile">手&nbsp;机&nbsp;号&nbsp;:</label></div>
+					<input id="usermobile" class="easyui-numberbox tbox" type="text" data-options="required:true" style="width: 150px;" />
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="email">邮箱地址&nbsp;:</label></div>
+					<input id="useremail" name="tbox" class="easyui-validatebox" type="text" name="email" data-options="validType:'email',required:true" />
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for="identityCard">身份证号&nbsp;:</label></div>
+					<input id="useridcard" name="tbox" class="easyui-validatebox" type="text" data-options="required:true" style="width: 150px;" />
+				</div>
+
+				<div class="useritem">
+					<div class="useritemdiv"><label for=""></label></div>
+					<a id="btnUser" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">确定</a>&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="JavaScript:closedUserInfo();" class="easyui-linkbutton" data-options="iconCls:'icon-back'">取消</a>
+				</div>
+			</form>
+		</div>
+
+		<!--设置用户-->
+		<div id="userroledg" class="easyui-dialog" title="设置用户信息" style="" data-options="iconCls:'icon-save',resizable:true,modal:true,closed:true">
+			<table id="tabEdit">
+				<tr>
+					<td>
+						<table id="dgAllRole" class="easyui-datagrid" title="系统所有角色" data-options="singleSelect:true,rownumbers:true"
+						 style="width:180px">
+							<thead>
+								<tr>
+									<th data-options="field:'roleId',width:80,hidden:true">编号</th>
+									<th data-options="field:'roleName',width:100">名称</th>
+								</tr>
+							</thead>
+						</table>
+					</td>
+					<td>
+						<input id="btnToRight" onclick="inserUserRole();" type="button" value=">>" title="把用户加入到选中的角色" />
+						<br />
+						<input id="btnToLeft" onclick="deleteUserRole();" type="button" value="<<" title="移除已经拥有的角色" />
+					</td>
+					<td valign="top" align="right">
+						<table id="dgMyRole" class="easyui-datagrid" title="当前用户的角色" data-options="singleSelect:true,rownumbers:true"
+						 style="width:180px">
+							<thead>
+								<tr>
+									<th data-options="field:'roleId',width:80,hidden:true">编号</th>
+									<th data-options="field:'roleName',width:100">名称</th>
+								</tr>
+							</thead>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+
+	</body>
+
+	<script>
+		$(function() {
+
+		});
+
+		$('#usertable').datagrid({
+			url: 'http://localhost:8080/mycrm/user/searchUserList.do',
+			method: 'post',
+			rownumbers: true,
+			toolbar: '#usertb',
+			singleSelect: true,
+			collapsible: true,
+			pagination: true,
+			pageList: [10, 15, 20, 30]
+		});
+
+		function formatterGender(value, row, index) {
+			if (value == 0) {
+				return "男";
+			}
+			if (value == 1) {
+				return "女";
+			}
+		}
+
+		function formatterSetUser(value, row, index) {
+			return "<a id='setpassword' style='cursor: pointer;' onclick='initPassword(" + index +
+				")'>初始化密码</a> <a style='cursor: pointer;' onclick='setRole(" + index + ")'>设置角色</a>";
+		}
+
+
+		$('#userinfotb').window({
+			width: 400,
+			height: 430,
+			modal: true,
+			iconCls: 'icon-edit',
+			resizable: false,
+			closed: true,
+			inline: true,
+			minimizable: false,
+			maximizable: false,
+			collapsible: false
+		});
+
+		var userid = null;
+		<!-- 显示用户添加表格-->
+		function showUserInfo(flag) {
+			if (flag == 'insert') {
+				$(".tbox").textbox("clear");
+				$("input[name='tbox']").val("");
+				$('#userinfotb').window('open');
+				$('#btnUser').linkbutton({
+					onClick: insertUserInfo
+				});
+			}
+			if (flag == 'update') {
+				userid = null;
+				var data = $("#usertable").datagrid("getSelected");
+				$('#btnUser').linkbutton({
+					onClick: updateUserInfo
+				});
+				if (null == data) {
+					$.messager.alert('提示', '请选择一个用户！', 'info');
+				} else {
+					userid = data.userId;
+					$('#userloginname').textbox('setValue', data.userLoginname);
+					$('#username').textbox('setValue', data.userName);
+					$('#usergender').combobox('setValue', data.userGender);
+					$('#userage').numberbox('setValue', data.userAge);
+					$('#userbirthday').datebox('setValue', data.userBirthday);
+					$('#usermobile').numberbox('setValue', data.userMobile);
+					$('#useremail').val(data.userEmail);
+					$('#useridcard').val(data.useridentityCard);
+					$('#userinfotb').window('open');
+				}
+			}
+
+		}
+
+		function closedUserInfo() {
+			$(".tbox").textbox("clear");
+			$("input[name='tbox']").val("");
+			$('#userinfotb').window('close');
+		}
+		<!-- 添加用户 -->
+		function insertUserInfo() {
+			var user = {
+				userLoginname: $('#userloginname').textbox('getValue'),
+				userName: $('#username').textbox('getValue'),
+				userGender: $('#usergender').combobox('getValue'),
+				userAge: $('#userage').numberbox('getValue'),
+				userBirthday: $('#userbirthday').datebox('getValue'),
+				userMobile: $('#usermobile').numberbox('getValue'),
+				userEmail: $('#useremail').val(),
+				useridentityCard: $('#useridcard').val()
+			}
+			$.ajax({
+				url: "http://localhost:8080/mycrm/user/insertUser.do",
+				dataType: "JSON",
+				contentType: 'application/json;character:utf-8',
+				type: "POST",
+				data: JSON.stringify(user),
+				success: function(data) {
+					if (data.success) {
+						$.messager.confirm('系统消息', data.msg, function(r) {
+							if (r) {
+								$('#userinfotb').window('close');
+								$('#usertable').datagrid('reload');
+								$(".tbox").textbox("clear");
+								$("input[name='tbox']").val("");
+							}
+						});
+					} else {
+						$.messager.alert('系统消息', data.msg, 'info');
+					}
+				}
+			});
+		}
+		<!-- 修改用户 -->
+		function updateUserInfo() {
+			var user = {
+				userId: userid,
+				userLoginname: $('#userloginname').textbox('getValue'),
+				userName: $('#username').textbox('getValue'),
+				userGender: $('#usergender').combobox('getValue'),
+				userAge: $('#userage').numberbox('getValue'),
+				userBirthday: $('#userbirthday').datebox('getValue'),
+				userMobile: $('#usermobile').numberbox('getValue'),
+				userEmail: $('#useremail').val(),
+				useridentityCard: $('#useridcard').val()
+			}
+			$.ajax({
+				url: "http://localhost:8080/mycrm/user/updateUser.do",
+				dataType: "JSON",
+				contentType: 'application/json;character:utf-8',
+				type: "POST",
+				data: JSON.stringify(user),
+				success: function(data) {
+					if (data.success) {
+						$('#userinfotb').window('close');
+						$('#usertable').datagrid('reload');
+						$(".tbox").textbox("clear");
+						$("input[name='tbox']").val("");
+						$.messager.alert('系统消息', data.msg, 'info');
+					} else {
+						$.messager.alert('系统消息', data.msg, 'info');
+					}
+				}
+			});
+		}
+
+		<!-- 删除用户-->
+		function deleteUser() {
+			var data = $("#usertable").datagrid("getSelected");
+			if (null == data) {
+				$.messager.alert('提示', '请选择一个用户！', 'info');
+			} else {
+				var user = {
+					userId: data.userId
+				};
+				$.messager.confirm('系统消息', "要删除<span style='color: red;'>" + data.userLoginname + "</span>用户吗?", function(r) {
+					if (r) {
+						$.ajax({
+							url: "http://localhost:8080/mycrm/user/deleteUser.do",
+							dataType: "JSON",
+							contentType: 'application/json;character:utf-8',
+							type: "POST",
+							data: JSON.stringify(user),
+							success: function(data) {
+								if (data.success) {
+									$.messager.alert('系统消息', data.msg, 'info');
+									$('#usertable').datagrid('reload');
+								} else {
+									$.messager.alert('系统消息', data.msg, 'info');
+								}
+							}
+						});
+					}
+				});
+
+			}
+		}
+
+		function initPassword(x) {
+			var data = $("#usertable").datagrid("getRows");
+			var user = {
+				userId: data[x].userId
+			};
+			$.messager.confirm('系统消息', "确定初始化<span style='color: red;'>" + data[x].userLoginname + "</span>的用户密码吗?", function(r) {
+				if (r) {
+					$.ajax({
+						url: "http://localhost:8080/mycrm/user/initPassword.do",
+						dataType: "JSON",
+						contentType: 'application/json;character:utf-8',
+						type: "POST",
+						data: JSON.stringify(user),
+						success: function(data) {
+							if (data.success) {
+								$.messager.alert('系统消息', data.msg, 'info');
+							}
+
+						}
+					});
+				}
+			});
+		}
+		var usercode = null;
+		<!-- 设置用户角色 -->
+		function setRole(x) {
+			var data = $("#usertable").datagrid("getRows");
+			$('#userroledg').window('open');
+			loadAllRole(data[x].userId);
+			loadMyRole(data[x].userId);
+			usercode = data[x].userId;
+
+		}
+
+		function loadAllRole(uid) {
+			$("#dgAllRole").datagrid({
+				url: "http://localhost:8080/mycrm/role/queryNotMyRole.do", //调用数据接口
+				queryParams: { //传递参数
+					userId: uid
+				}
+			});
+		}
+
+		function loadMyRole(uid) {
+			$("#dgMyRole").datagrid({
+				url: "http://localhost:8080/mycrm/role/queryMyRole.do", //调用数据接口
+				queryParams: { //传递参数
+					userId: uid
+				}
+			});
+		}
+
+		function inserUserRole() {
+			var row = $("#dgAllRole").datagrid("getSelected");
+			if (null == row) {
+				$.messager.alert('提示', '请选择一个角色！', 'info');
+			} else {
+				$.post("http://localhost:8080/mycrm/role/insertMyRole.do", {
+					userId: usercode,
+					roleId: row.roleId
+				}, function(data) {
+					if (data.success) {
+						loadAllRole(usercode);
+						loadMyRole(usercode);
+					}
+				}, "json");
+			}
+		}
+
+		function deleteUserRole() {
+			var row = $("#dgMyRole").datagrid("getSelected");
+			if (null == row) {
+				$.messager.alert('提示', '请选择一个角色！', 'info');
+			} else {
+				$.post("http://localhost:8080/mycrm/role/removeMyRole.do", {
+					userId: usercode,
+					roleId: row.roleId
+				}, function(data) {
+					if (data.success) {
+						loadAllRole(usercode);
+						loadMyRole(usercode);
+					}
+				}, "json");
+			}
+
+		}
+	</script>
+</html>

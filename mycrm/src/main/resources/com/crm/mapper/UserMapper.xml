@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crm.dao.UserMapper">
+
+	<sql id="GetUserPoColumn">
+		user_id,user_create,user_modified,user_loginname,user_name,
+		user_islocking,useridentity_card,user_gender,user_mobile,
+		user_email,user_birthday,user_age,user_flag,user_password
+	</sql>
+	
+	
+	<select id="queryUserList" parameterType="com.crm.entity.Page" resultType="com.crm.pojo.UserPo">
+		SELECT <include refid="GetUserPoColumn" />
+  		FROM USER WHERE user_flag = '0' LIMIT #{firstPage}, #{rows};
+	</select>
+	
+	<select id="queryCountUser" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM USER WHERE 1 = 1;
+	</select>
+	
+	<insert id="insertUser" parameterType="com.crm.pojo.UserPo" >
+		INSERT INTO user(user_create,user_loginname,user_name,useridentity_card,user_gender,user_mobile,user_email,user_birthday,user_age)
+		values (#{userCreate},#{userLoginname},#{userName},#{useridentityCard},#{userGender},#{userMobile},#{userEmail},#{userBirthday},#{userAge});
+	</insert>
+	
+	<update id="saveUser" parameterType="com.crm.pojo.UserPo" >
+		UPDATE USER
+		 <trim prefix="SET" suffixOverrides=",">
+		 	<if test="userLoginname !=null ">
+	     		user_loginname  = #{userLoginname},
+	   		</if>
+	   		<if test="userName !=null ">
+	     		user_name  = #{userName},
+	   		</if>
+	   		<if test="userGender !=null ">
+	     		user_gender  = #{userGender},
+	   		</if>
+	   		<if test="userAge !=null ">
+	     		user_age  = #{userAge},
+	   		</if>
+	   		<if test="userBirthday !=null ">
+	     		user_birthday  = #{userBirthday},
+	   		</if>
+	   		<if test="userMobile !=null ">
+	     		user_mobile  = #{userMobile},
+	   		</if>
+	   		<if test="userEmail !=null ">
+	     		user_email  = #{userEmail},
+	   		</if>
+	   		<if test="useridentityCard !=null ">
+	     		useridentity_card  = #{useridentityCard},
+	   		</if>
+	   		<if test="userModified !=null ">
+	     		user_modified  = #{userModified},
+	   		</if>
+	   	</trim>
+		WHERE  user_id  = #{userId};
+	</update>
+	
+	<update id="removeUser" parameterType="com.crm.pojo.UserPo">
+			UPDATE USER SET user_flag = '1',user_modified  = #{userModified} where user_id = #{userId};
+	</update>
+	
+	<update id="setPassword" parameterType="com.crm.pojo.UserPo">
+			UPDATE USER SET user_password = #{userPassword},user_modified  = #{userModified} where user_id = #{userId};
+	</update>
+	
+	
+
+</mapper>

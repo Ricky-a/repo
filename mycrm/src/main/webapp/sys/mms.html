@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>模块管理</title>
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../js/windowAdapter.js"></script>
+		<script type="text/javascript" src="../js/locale/easyui-lang-zh_CN.js"></script>
+		<link rel="stylesheet" type="text/css" href="../js/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="../js/themes/icon.css">
+	</head>
+	<style>
+		.treeitem {
+			width: 250px;
+			height: 30px;
+			margin: 10px 0px 0px 60px;
+			float: left;
+
+		}
+
+		.treeitemdiv {
+			width: 80px;
+			float: left;
+			margin-top: 5px;
+		}
+
+		a:hover {
+			color: red;
+		}
+
+		#setpassword {
+			margin-right: 20px;
+		}
+
+		.tbox {
+			width: 150px;
+
+		}
+
+		.treebtn {
+			margin: 10px;
+		}
+	</style>
+	<body>
+
+		<div id="treetb">
+			<a href="#" class="easyui-linkbutton" onclick="showTreeInfo('add');" data-options="iconCls:'icon-add',plain:true">新建</a>
+			<a href="#" class="easyui-linkbutton" onclick="deleteTree();" data-options="iconCls:'icon-remove',plain:true">删除</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+			<a href="#" class="easyui-linkbutton" onclick="executeReload();" data-options="iconCls:'icon-reload',plain:true">刷新</a>
+		</div>
+
+		<div style="margin:10px 0;"></div>
+		<div class="easyui-panel" style="padding:5px">
+			<ul id="treetable" class="easyui-tree" data-options=""></ul>
+		</div>
+		<!--右键菜单定义-->
+		<div id="mtree" class="easyui-menu" style="width:120px;">
+			<div onclick="append()" data-options="iconCls:'icon-add'">追加</div>
+			<div onclick="deleteTree()" data-options="iconCls:'icon-remove'">移除</div>
+		</div>
+
+
+
+		<div class="easyui-window" id="treeinfotb">
+			<form id="treeinfoform" method="post">
+
+				<div class="treeitem" hidden="hidden">
+					<div class="treeitemdiv"><label>上级菜单编号&nbsp;:</label></div>
+					<input id="treeparentid" class="easyui-textbox tbox" data-options="required:true">
+				</div>
+				<div id="parentName" class="treeitem" style="width: 350px;margin-top: 30px;">
+					<div class="treeitemdiv"><label>上级菜单&nbsp;:</label></div>
+					<input id="parentTree" class="easyui-combotree tbox">
+					<!-- <input id="treePName" class="easyui-textbox tbox" data-options="required:true,readonly:true" disabled="disabled"> -->
+					<!-- <a id="" href="#" onclick="showTree();" class="easyui-linkbutton">设置菜单</a> -->
+				</div>
+
+
+
+				<div class="treeitem" hidden="hidden">
+					<div class="treeitemdiv"><label>菜单编号&nbsp;:</label></div>
+					<input id="treeid" class="easyui-textbox tbox" data-options="required:true">
+				</div>
+
+				<div class="treeitem">
+					<div class="treeitemdiv"><label>菜单名称&nbsp;:</label></div>
+					<input id="treetext" class="easyui-textbox tbox" data-options="required:true">
+				</div>
+
+				<div class="treeitem">
+					<div class="treeitemdiv"><label for="name">菜单地址&nbsp;:</label></div>
+					<input id="treeurl" class="easyui-textbox tbox" data-options="required:true" />
+				</div>
+
+				<div class="treeitem">
+					<div class="treeitemdiv"><label></label></div>
+					<a id="saveTree" href="#" class="easyui-linkbutton treebtn" data-options="iconCls:'icon-ok'">确定</a>
+					<a id="closeTree" href="#" onclick="closedTreeInfo();" class="easyui-linkbutton treebtn" data-options="iconCls:'icon-back'">取消</a>
+				</div>
+			</form>
+		</div>
+
+		<!-- 
+		<div id="setTree" class="easyui-window" style="padding:5px">
+			<ul id="setTreelist" class="easyui-tree"></ul>
+		</div>
+ -->
+
+
+
+	</body>
+
+	<script>
+		$(function() {
+			initParentTree(1);
+		});
+
+		//初始化树
+		var menuId = null;
+		var menuParentId = null;
+		$('#treetable').tree({
+			url: 'http://localhost:8080/mycrm/menu/queryTreeList',
+			method: 'post',
+			animate: 'true',
+			lines: 'true',
+			toolbar: '#treetb',
+			//双击一个节点显示面板
+			onDblClick: function(node) {
+				$.post("http://localhost:8080/mycrm/menu/queryMenuById", {
+					menucode: node.id
+				}, function(data) {
+					menuId = data.menuId;
+					//设置修改面板的属性,值
+					//$('#treePName').textbox('setValue', "");
+					$('#treeinfotb').window({
+						title: "正在修改<span style='color: red;'>" + data.menuName + "</span>,上一次修改时间:" + data.menuModified
+					});
+					$('#treeid').textbox('setValue', data.menuId);
+					$('#treetext').textbox('setValue', data.menuName);
+					$('#treeurl').textbox('setValue', data.menuUrl);
+					menuParentId = data.menuParentid;
+					if (menuParentId == 0) {
+						menuParentId = "新建菜单"
+					}
+					initParentTree(menuParentId);
+					showTreeInfo('update');
+					//判断不是父级菜单设置属性
+					/* if (data.menuParentid != 0) {
+						$.post("http://localhost:8080/mycrm/menu/queryMenuById", {
+							menucode: data.menuParentid
+						}, function(fdata) {
+							$('#treePName').textbox('setValue', fdata.menuName);
+						});
+					} */
+
+				});
+
+			},
+			// 右键点击节点并显示快捷菜单
+			onContextMenu: function(e, node) {
+				//阻止浏览器菜单
+				e.preventDefault();
+				// 查找节点
+				$('#treetable').tree('select', node.target);
+				// 显示快捷菜单
+				$('#mtree').menu('show', {
+					left: e.pageX,
+					top: e.pageY
+				});
+			}
+		});
+
+		//初始化菜单树
+		$('#treeinfotb').window({
+			width: 425,
+			height: 260,
+			modal: true,
+			iconCls: 'icon-edit',
+			resizable: false,
+			closed: true,
+			inline: true,
+			minimizable: false,
+			maximizable: false,
+			collapsible: false
+		});
+
+		//初始化上级菜单列表树
+		function initParentTree(treenodeId) {
+			$('#parentTree').combotree({
+				url: 'http://localhost:8080/mycrm/menu/queryTreeList',
+				method: 'post',
+				required: 'true',
+				value: treenodeId
+			});
+		}
+
+
+		//自定义面板属性
+		/* 	$('#setTree').window({
+				width: 250,
+				title: '设置菜单',
+				modal: true,
+				resizable: false,
+				closed: true,
+				inline: true,
+				minimizable: false,
+				maximizable: false,
+				collapsible: false
+			}); */
+
+
+
+		//刷新菜单树
+		function executeReload() {
+			$('#treetable').tree('reload');
+		}
+		//关闭修改面板
+		function closedTreeInfo() {
+			$('#treeid').textbox('setValue', "");
+			$('#treetext').textbox('setValue', "");
+			$('#treeurl').textbox('setValue', "");
+			$('#treeinfotb').window('close');
+		}
+		//显示修改面板
+		function showTreeInfo(falg) {
+			if (falg == 'add') {
+				$('#saveTree').linkbutton({
+					onClick: insertTreeInfo
+				});
+			}
+			if (falg == 'update') {
+				$('#saveTree').linkbutton({
+					onClick: saveTreeInfo
+				});
+			}
+			$('#treeinfotb').window('open');
+		}
+		/* function showTree() {
+			var tid = $('#treeid').textbox('getValue');
+			$('#setTreelist').tree({
+				url: 'http://localhost:8080/mycrm/menu/queryTreeList',
+				method: 'post',
+				checkbox: 'true',
+				cascadeCheck: false,
+				onBeforeCheck: function(node) {
+					//在点击勾选复选框之前,取消上一次的勾选.只可以选中一项
+					$(this).find("span.tree-checkbox").removeClass("tree-checkbox1").addClass("tree-checkbox0");
+					console.log($(this).find("span.tree-checkbox"));
+				},
+				onLoadSuccess: function(node, data) {
+					//在数据加载成功后,设置此次修改的菜单不显示.防止自己将自己加入子菜单
+					 for (var i in data) {
+						//console.log(data[i]);
+						if (data[i].id == tid) {
+							var node = $('#setTreelist').tree('find', tid);
+							node.target.style.display = 'none';
+						}
+						for (var j in data[i].children) {
+							//console.log(data[i].children[j]);
+							if (data[i].children[j].id == tid) {
+								var node = $('#setTreelist').tree('find', tid);
+								node.target.style.display = 'none';
+							}
+						}
+					} 
+					$('#setTreelist').tree('expandAll');//展开所有节点
+					var node = $('#setTreelist').tree('find', 1); //找到id为”tt“这个树的节点id为”1“的对象
+					console.log(node);
+					$('#setTreelist').tree('check', node.target);//设置选中该节点
+					
+				}
+			});
+			//$('#setTree').window('open');
+		}*/
+
+
+		//修改菜单
+		function saveTreeInfo() {
+			//当前修改的菜单ID
+			var treeid = $('#treeid').textbox('getValue');
+			//设置上级菜单的ID
+			var pid = $('#parentTree').combotree('tree').tree('getSelected');
+			if (pid == null) {
+				pid = 0;
+			} else {
+				pid = pid.id;
+			}
+			if (treeid == pid) {
+				pid = 0;
+			}
+			$.messager.confirm('确认', '您确认想要修改菜单吗？', function(r) {
+				if (r) {
+					$.post("http://localhost:8080/mycrm/menu/saveMenu", {
+						menuId: treeid,
+						menuName: $('#treetext').textbox('getValue'),
+						menuUrl: $('#treeurl').textbox('getValue'),
+						menuParentid: pid
+					}, function(data) {
+						$.messager.alert('系统消息', data.msg, 'info');
+						$('#treetable').tree('reload');
+						closedTreeInfo();
+					});
+				}
+			});
+		}
+
+		//添加菜单
+		function insertTreeInfo() {
+			//当前修改的菜单ID
+			var treeid = $('#treeid').textbox('getValue');
+			//设置上级菜单的ID
+			var pid = $('#parentTree').combotree('tree').tree('getSelected');
+			if (pid == null) {
+				pid = 0;
+			} else {
+				pid = pid.id;
+			}
+			if (treeid == pid) {
+				pid = 0;
+			}
+			$.messager.confirm('确认', '您确认想要添加菜单吗？', function(r) {
+				if (r) {
+					$.post("http://localhost:8080/mycrm/menu/insertMenu", {
+						menuName: $('#treetext').textbox('getValue'),
+						menuUrl: $('#treeurl').textbox('getValue'),
+						menuParentid: pid
+					}, function(data) {
+						$.messager.alert('系统消息', data.msg, 'info');
+						$('#treetable').tree('reload');
+						closedTreeInfo();
+					});
+				}
+			});
+		}
+
+
+		function deleteTree() {
+			var node = $('#treetable').tree('getSelected');
+			$.messager.confirm('确认', '您确认要删除<span style="color: red;">' + node.text + '</span>菜单吗？', function(r) {
+				if (r) {
+					$.post("http://localhost:8080/mycrm/menu/deleteMenu", {
+							menuId: node.id
+						}, function(data) {
+							$.messager.alert('系统消息', data.msg, 'info');
+							executeReload();
+					});
+				}	
+			});
+
+		}
+	</script>
+
+
+</html>

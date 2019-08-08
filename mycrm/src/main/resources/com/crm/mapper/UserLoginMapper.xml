@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crm.dao.UserLoginMapper">
+
+	<sql id="GetUserPoColumn">
+		user_id,user_create,user_modified,user_loginname,user_name,
+		user_islocking,useridentity_card,user_gender,user_mobile,
+		user_email,user_birthday,user_age,user_flag,user_password
+	</sql>
+
+	
+	<select id="queryUserPo" parameterType="java.lang.String" resultType="com.crm.pojo.UserPo">
+		SELECT <include refid="GetUserPoColumn" /> FROM USER  WHERE user_loginname = #{loginname};
+	</select>
+	
+	<select id="queryUserRoleList" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT DISTINCT r.role_name
+		FROM USER u LEFT JOIN userrole ur ON u.user_id = ur.user_id 
+					LEFT JOIN role r ON ur.role_id = r.role_id 
+		WHERE u.user_loginname = #{loginname};
+	</select>
+	
+
+</mapper>

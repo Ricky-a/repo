@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crm.dao.MenuMapper">
+
+	<sql id="GetMenuPoColumn">
+	 	menu_id,menu_name,menu_url,menu_create,menu_modified,menu_integer,menu_string,menu_parentid
+	</sql>
+	
+	<sql id="GetMyMenuPoColumn">
+		m.menu_id,m.menu_name,m.menu_url,m.menu_create,m.menu_modified,m.menu_integer,m.menu_string,m.menu_parentid
+	</sql>
+	
+	
+	<select id="queryMyParentMenu" parameterType="java.lang.Integer" resultType="com.crm.pojo.MenuPo">
+		SELECT DISTINCT<include refid="GetMyMenuPoColumn" />
+		FROM userrole ur 
+		LEFT JOIN rolemenu rm ON ur.role_id = rm.role_id 
+		LEFT JOIN menu m ON rm.menu_id = m.menu_id
+		WHERE ur.user_id = #{usercode} AND m.menu_parentid = '0'
+	</select>
+	
+	<select id="queryMyDetailMenu" parameterType="java.lang.Integer" resultType="com.crm.pojo.MenuPo">
+		SELECT DISTINCT<include refid="GetMyMenuPoColumn" />
+		FROM userrole ur 
+		LEFT JOIN rolemenu rm ON ur.role_id = rm.role_id 
+		LEFT JOIN menu m ON rm.menu_id = m.menu_id
+		WHERE ur.user_id = #{usercode} AND m.menu_parentid = #{parentcode}
+	</select>
+	
+	
+	<select id="queryMenuList" parameterType="com.crm.entity.Page" resultType="com.crm.pojo.MenuPo">
+		SELECT <include refid="GetMenuPoColumn" />
+		FROM menu LIMIT #{firstPage}, #{rows};
+	</select>
+	
+	<select id="queryCountMenu"  resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM menu WHERE 1 = 1;
+	</select>
+	
+	
+	<update id="updateMenu" parameterType="com.crm.pojo.MenuPo" >
+		UPDATE menu u  
+		SET u.menu_name=#{menuName},u.menu_url=#{menuUrl},u.menu_modified=#{menuModified},u.menu_parentid=#{menuParentid}
+		WHERE u.menu_id = #{menuId}
+	</update>
+	
+	<delete id="deleteMenu" parameterType="java.lang.Integer">
+		DELETE FROM menu  WHERE menu_id = #{menuId}
+	</delete>
+	
+	<insert id="insertMenu" parameterType="com.crm.pojo.MenuPo">
+		INSERT INTO menu (menu_name,menu_url,menu_create,menu_parentid)
+			VALUE(#{menuName},#{menuUrl},#{menuCreate},#{menuParentid})
+	</insert>
+	
+	
+	
+	
+	
+	<select id="queryTreeList" resultType="com.crm.pojo.MenuPo">
+		SELECT DISTINCT<include refid="GetMenuPoColumn" /> FROM menu 
+	</select>
+	
+	<select id="queryMenuById" parameterType="java.lang.Integer" resultType="com.crm.pojo.MenuPo">
+		select <include refid="GetMenuPoColumn" /> from menu where menu_id = #{menucode};
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<select id="queryNotMyMenu" parameterType="java.lang.String" resultType="com.crm.pojo.MenuPo">
+		SELECT <include refid="GetMenuPoColumn" /> 
+		FROM menu u  WHERE u.menu_id NOT IN (SELECT menu_id FROM rolemenu eu WHERE eu.role_id = #{roleId});
+	</select>
+	
+	
+	<select id="queryMyMenu" parameterType="java.lang.String" resultType="com.crm.pojo.MenuPo">
+		SELECT <include refid="GetMenuPoColumn" />
+		 FROM menu u  WHERE u.menu_id IN (SELECT menu_id FROM rolemenu eu WHERE eu.role_id = #{roleId});
+	</select>
+	
+	<delete id="removeMyMenu" parameterType="java.lang.String">
+		DELETE FROM rolemenu  WHERE role_id = #{roleId} AND menu_id = #{menuId};
+	</delete>
+	
+	<insert id="insertMyMenu" parameterType="java.lang.String">
+		INSERT INTO rolemenu(role_id,menu_id)VALUES(#{roleId},#{menuId}); 
+	</insert>
+	
+	
+	
+	
+
+</mapper>
