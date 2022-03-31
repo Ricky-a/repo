@@ -168,7 +168,7 @@
 		<dependency><!-- spring mvc实现 -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>4.3.3.RELEASE</version>
+			<version>5.3.18</version>
 		</dependency>
 		<!-- ※ spring test相关依赖 -->
 		<dependency><!-- spring测试，提供junit与mock测试功能 -->
