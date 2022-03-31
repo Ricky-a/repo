@@ -141,7 +141,7 @@
 		<dependency><!-- Bean工厂与bean的装配 -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
-			<version>4.3.3.RELEASE</version>
+			<version>5.3.18</version>
 		</dependency>
 		<dependency><!-- spring的context上下文即IoC容器 -->
 			<groupId>org.springframework</groupId>
