@@ -136,7 +136,7 @@
 		<dependency><!-- 依赖注入IoC与DI的最基本实现 -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>4.3.3.RELEASE</version>
+			<version>5.3.19</version>
 		</dependency>
 		<dependency><!-- Bean工厂与bean的装配 -->
 			<groupId>org.springframework</groupId>
