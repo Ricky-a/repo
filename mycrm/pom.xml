@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.37</version>
+			<version>8.0.28</version>
 			<scope>runtime</scope><!-- 设置工作范围,生命周期,runtime运行时工作 -->
 		</dependency>
 		<!-- ※ 数据库连接池 -->
